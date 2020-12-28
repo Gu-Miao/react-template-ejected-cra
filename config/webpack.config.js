@@ -1,3 +1,4 @@
+const glob = require('glob')
 const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
@@ -24,6 +25,9 @@ const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin')
 const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin')
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter')
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
+const SpeedMeasureWebpackPlugin = require('speed-measure-webpack-plugin')
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+const PurgeCSSPlugin = require('purgecss-webpack-plugin')
 
 const postcssNormalize = require('postcss-normalize')
 
@@ -68,7 +72,7 @@ const hasJsxRuntime = (() => {
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function (webpackEnv) {
+function webpackConfig(webpackEnv) {
   const isEnvDevelopment = webpackEnv === 'development'
   const isEnvProduction = webpackEnv === 'production'
 
@@ -88,6 +92,7 @@ module.exports = function (webpackEnv) {
   const getStyleLoaders = (cssOptions, preProcessor) => {
     const loaders = [
       isEnvDevelopment && require.resolve('style-loader'),
+      // isEnvProduction && require.resolve('thread-loader'),
       isEnvProduction && {
         loader: MiniCssExtractPlugin.loader,
         // css is located in `static/css`, use '../../' to locate index.html folder
@@ -371,65 +376,75 @@ module.exports = function (webpackEnv) {
             {
               test: /\.(js|mjs|jsx|ts|tsx)$/,
               include: paths.appSrc,
-              loader: require.resolve('babel-loader'),
-              options: {
-                customize: require.resolve('babel-preset-react-app/webpack-overrides'),
-                presets: [
-                  [
-                    require.resolve('babel-preset-react-app'),
-                    {
-                      runtime: hasJsxRuntime ? 'automatic' : 'classic'
-                    }
-                  ]
-                ],
-
-                plugins: [
-                  [
-                    require.resolve('babel-plugin-named-asset-import'),
-                    {
-                      loaderMap: {
-                        svg: {
-                          ReactComponent: '@svgr/webpack?-svgo,+titleProp,+ref![path]'
+              use: [
+                isEnvProduction && require.resolve('thread-loader'),
+                {
+                  loader: require.resolve('babel-loader'),
+                  options: {
+                    customize: require.resolve('babel-preset-react-app/webpack-overrides'),
+                    presets: [
+                      [
+                        require.resolve('babel-preset-react-app'),
+                        {
+                          runtime: hasJsxRuntime ? 'automatic' : 'classic'
                         }
-                      }
-                    }
-                  ],
-                  isEnvDevelopment &&
-                    shouldUseReactRefresh &&
-                    require.resolve('react-refresh/babel')
-                ].filter(Boolean),
-                // This is a feature of `babel-loader` for webpack (not Babel itself).
-                // It enables caching results in ./node_modules/.cache/babel-loader/
-                // directory for faster rebuilds.
-                cacheDirectory: true,
-                // See #6846 for context on why cacheCompression is disabled
-                cacheCompression: false,
-                compact: isEnvProduction
-              }
+                      ]
+                    ],
+
+                    plugins: [
+                      [
+                        require.resolve('babel-plugin-named-asset-import'),
+                        {
+                          loaderMap: {
+                            svg: {
+                              ReactComponent: '@svgr/webpack?-svgo,+titleProp,+ref![path]'
+                            }
+                          }
+                        }
+                      ],
+                      isEnvDevelopment &&
+                        shouldUseReactRefresh &&
+                        require.resolve('react-refresh/babel')
+                    ].filter(Boolean),
+                    // This is a feature of `babel-loader` for webpack (not Babel itself).
+                    // It enables caching results in ./node_modules/.cache/babel-loader/
+                    // directory for faster rebuilds.
+                    cacheDirectory: true,
+                    // See #6846 for context on why cacheCompression is disabled
+                    cacheCompression: false,
+                    compact: isEnvProduction
+                  }
+                }
+              ].filter(Boolean)
             },
             // Process any JS outside of the app with Babel.
             // Unlike the application JS, we only compile the standard ES features.
             {
               test: /\.(js|mjs)$/,
               exclude: /@babel(?:\/|\\{1,2})runtime/,
-              loader: require.resolve('babel-loader'),
-              options: {
-                babelrc: false,
-                configFile: false,
-                compact: false,
-                presets: [
-                  [require.resolve('babel-preset-react-app/dependencies'), { helpers: true }]
-                ],
-                cacheDirectory: true,
-                // See #6846 for context on why cacheCompression is disabled
-                cacheCompression: false,
+              use: [
+                isEnvProduction && require.resolve('thread-loader'),
+                {
+                  loader: require.resolve('babel-loader'),
+                  options: {
+                    babelrc: false,
+                    configFile: false,
+                    compact: false,
+                    presets: [
+                      [require.resolve('babel-preset-react-app/dependencies'), { helpers: true }]
+                    ],
+                    cacheDirectory: true,
+                    // See #6846 for context on why cacheCompression is disabled
+                    cacheCompression: false,
 
-                // Babel sourcemaps are needed for debugging into node_modules
-                // code.  Without the options below, debuggers like VSCode
-                // show incorrect code and set breakpoints on the wrong lines.
-                sourceMaps: shouldUseSourceMap,
-                inputSourceMap: shouldUseSourceMap
-              }
+                    // Babel sourcemaps are needed for debugging into node_modules
+                    // code.  Without the options below, debuggers like VSCode
+                    // show incorrect code and set breakpoints on the wrong lines.
+                    sourceMaps: shouldUseSourceMap,
+                    inputSourceMap: shouldUseSourceMap
+                  }
+                }
+              ].filter(Boolean)
             },
             // "postcss" loader applies autoprefixer to our CSS.
             // "css" loader resolves paths in CSS and adds assets as dependencies.
@@ -520,6 +535,13 @@ module.exports = function (webpackEnv) {
       ]
     },
     plugins: [
+      // Add bundle analyze when build.
+      isEnvProduction &&
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          reportFilename: path.join(paths.appPath, 'report.html'),
+          openAnalyzer: false
+        }),
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
         Object.assign(
@@ -599,6 +621,14 @@ module.exports = function (webpackEnv) {
           // both options are optional
           filename: 'static/css/[name].[contenthash:8].css',
           chunkFilename: 'static/css/[name].[contenthash:8].chunk.css'
+        }),
+      // Remove style that never use.
+      isEnvProduction &&
+        new PurgeCSSPlugin({
+          paths: [
+            ...glob.sync(`${paths.appPublic}/**/*`, { nodir: true }),
+            ...glob.sync(`${paths.appPublic}/**/*`, { nodir: true })
+          ]
         }),
       // Generate an asset manifest file with the following content:
       // - "files" key: Mapping of all asset filenames to their corresponding
@@ -707,3 +737,7 @@ module.exports = function (webpackEnv) {
     performance: false
   }
 }
+
+const smw = new SpeedMeasureWebpackPlugin()
+
+module.exports = process.env.NODE_ENV === 'production' ? smw.wrap(webpackConfig) : webpackConfig
