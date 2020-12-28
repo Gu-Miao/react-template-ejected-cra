@@ -64,7 +64,9 @@ function getWebpackAliases(options = {}) {
   if (path.relative(paths.appPath, baseUrlResolved) === '') {
     return {
       '@': paths.appSrc,
-      '@components': path.join(paths.appSrc, 'components')
+      '@assets': path.join(paths.appSrc, 'assets'),
+      '@components': path.join(paths.appSrc, 'components'),
+      '@pages': path.join(paths.appSrc, 'pages')
     }
   }
 }
