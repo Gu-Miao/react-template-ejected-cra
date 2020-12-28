@@ -3,7 +3,7 @@ import Hello from '@components/hello'
 
 import logo from '@assets/logo.svg'
 
-import './style.css'
+import './style.less'
 
 function Home() {
   return (
