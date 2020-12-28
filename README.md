@@ -1,4 +1,4 @@
-# React Template Ejected
+# React Template Ejected CRA
 
 This is a template repo of react. Based on ejected CRA4, there are a few packages has been added and new features are shown below:
 
