@@ -1,6 +1,5 @@
 {
-  "name": "react-starter",
-  "version": "0.1.0",
+  "name": "react-template-ejected-cra",
   "dependencies": {
     "@babel/core": "7.12.3",
     "@babel/plugin-syntax-jsx": "^7.12.1",
