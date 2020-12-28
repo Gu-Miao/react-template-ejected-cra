@@ -66,7 +66,8 @@ function getWebpackAliases(options = {}) {
       '@': paths.appSrc,
       '@assets': path.join(paths.appSrc, 'assets'),
       '@components': path.join(paths.appSrc, 'components'),
-      '@pages': path.join(paths.appSrc, 'pages')
+      '@pages': path.join(paths.appSrc, 'pages'),
+      '@utils': path.join(paths.appSrc, 'utils')
     }
   }
 }
