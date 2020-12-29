@@ -9941,6 +9941,11 @@ react-refresh@^0.8.3:
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.8.3.tgz#721d4657672d400c5e3c75d063c4a85fb2d5d68f"
   integrity sha512-X8jZHc7nCMjaCqoU+V2I0cOhNW+QMBwSUkeXnTi8IPe6zaRWfn60ZzvFDZqWPfmSJfjub7dDW1SP0jaHWLu/hg==
 
+react-router-cache-route@^1.10.1:
+  version "1.10.1"
+  resolved "https://registry.yarnpkg.com/react-router-cache-route/-/react-router-cache-route-1.10.1.tgz#5e0c593c63ec4cdd586bf355d359fb7158d28483"
+  integrity sha512-fg5wjhi5sKrzk+wRrLg1TQOj9BvVd7TUW+C1oJFhBTmo8EetX7awWeE0oBwnA2+gwYGiYKKj6UfYQD6MQHAjMw==
+
 react-router-dom@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-5.2.0.tgz#9e65a4d0c45e13289e66c7b17c7e175d0ea15662"
