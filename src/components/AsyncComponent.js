@@ -17,7 +17,7 @@ export const RouterHooks = {
   }
 }
 
-function AsyncRouter(componentPath) {
+function AsyncRouter(componentPath, title) {
   return class Content extends Component {
     constructor(props) {
       super(props)
@@ -35,7 +35,12 @@ function AsyncRouter(componentPath) {
       const loader = () => import(`@pages/${componentPath}`)
       loader()
         .then(module => module.default)
-        .then(Component => this.setState({ Component }, () => this.dispatchRouterQueue('after')))
+        .then(Component =>
+          this.setState({ Component }, () => {
+            if (title) document.title = title
+            this.dispatchRouterQueue('after')
+          })
+        )
         .catch(err => {
           throw new Error(err)
         })

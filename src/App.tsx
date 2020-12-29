@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Route } from 'react-router-dom'
+import CacheRoute, { CacheSwitch } from 'react-router-cache-route'
 import AsyncComponent from '@components/AsyncComponent'
 
 import routers from '@/router'
@@ -6,11 +7,12 @@ import routers from '@/router'
 const App = () => {
   return (
     <Router>
-      <Switch>
-        {routers.map(({ component, ...restProps }, key) => (
-          <Route key={key} {...restProps} component={AsyncComponent(component)} />
-        ))}
-      </Switch>
+      <CacheSwitch>
+        {routers.map(({ component, when, title, ...restProps }, key) => {
+          const RouteComp = when ? CacheRoute : Route
+          return <RouteComp key={key} {...restProps} component={AsyncComponent(component, title)} />
+        })}
+      </CacheSwitch>
     </Router>
   )
 }
